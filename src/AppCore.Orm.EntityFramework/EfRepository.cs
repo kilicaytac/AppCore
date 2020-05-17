@@ -2,7 +2,8 @@
 using System.Threading.Tasks;
 
 namespace AppCore.Orm.EntityFramework
-{    public class EfRepository<T> : IRepository<T> where T : class
+{
+    public class EfRepository<T> : IRepository<T> where T : class
     {
         private readonly DbContext _dbContext;
 
@@ -29,6 +30,11 @@ namespace AppCore.Orm.EntityFramework
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<T> GetByIdAsync<IdType>(IdType id)
+        {
+            return await _dbContext.Set<T>().FindAsync(id);
         }
     }
 }

@@ -131,5 +131,27 @@ namespace AppCore.Orm.EntityFramework.Test
                 Assert.True(testDbContext.TestEntities.Count() == 2);
             }
         }
+
+        [Fact]
+        public async Task Should_ReadUnCommitted_Isolation_Level_Work_As_Expected()
+        {
+            //Arrange
+            await _efUnitofWork.BeginAsync(System.Data.IsolationLevel.ReadUncommitted);
+
+            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
+            _repository.Add(testEntity);
+            await _repository.SaveChangesAsync();
+
+            TestEntity result = null;
+
+            //Act
+            using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
+            {
+                result = await new EfRepository<TestEntity>(testDbContext).GetByIdAsync<int>(testEntity.Id);
+            }
+
+            //Assert
+            Assert.NotNull(result);
+        }
     }
 }

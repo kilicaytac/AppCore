@@ -104,5 +104,20 @@ namespace AppCore.Orm.EntityFramework.Test
             //Assert
             Assert.NotNull(_testDbContext.TestEntities.FirstOrDefault(q => q.Id == entity.Id));
         }
+
+        [Fact]
+        public async Task GetByIdAsync_Should_Work_As_Expected()
+        {
+            //Arrange
+            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
+            _repository.Add(entity);
+            await _repository.SaveChangesAsync();
+
+            //Act
+            var queryResult = await _repository.GetByIdAsync<int>(entity.Id);
+
+            //Assert
+            Assert.NotNull(queryResult);
+        }
     }
 }
