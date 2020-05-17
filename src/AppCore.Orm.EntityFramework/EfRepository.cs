@@ -1,15 +1,12 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace AppCore.Orm.EntityFramework
-{
-    public class EntityFrameworkRepository<T> : IRepository<T> where T : class
+{    public class EfRepository<T> : IRepository<T> where T : class
     {
         private readonly DbContext _dbContext;
 
-        public EntityFrameworkRepository(DbContext dbContext)
+        public EfRepository(DbContext dbContext)
         {
             _dbContext = dbContext;
         }

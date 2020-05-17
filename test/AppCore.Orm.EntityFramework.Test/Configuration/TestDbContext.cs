@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace AppCore.UnitTest.Orm.EntityFramework
+namespace AppCore.Orm.EntityFramework.Test.Configuration
 {
     public class TestDbContext : DbContext
     {
@@ -15,6 +12,8 @@ namespace AppCore.UnitTest.Orm.EntityFramework
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<TestEntity>().ToTable("TestEntity");
+
             modelBuilder.Entity<TestEntity>(
                                                b =>
                                                {
