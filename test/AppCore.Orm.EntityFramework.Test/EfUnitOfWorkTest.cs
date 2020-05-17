@@ -48,7 +48,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public async Task BeginAsync_Should_Work_As_Expected()
+        public async Task BeginAsync_Should_Open_Transaction_To_Underlying_Database()
         {
             //Arrange
 
@@ -70,7 +70,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public async Task CommitAsync_Should_Work_As_Expected()
+        public async Task CommitAsync_Should_Commit_Transaction_Changes_To_Underlying_Database()
         {
             //Arrange
             await _efUnitofWork.BeginAsync();
@@ -89,7 +89,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public async Task RollbackAsync_Should_Work_As_Expected()
+        public async Task RollbackAsync_Should_Rollback_Uncommitted_Changes_To_Underlying_Database()
         {
             //Arrange
             await _efUnitofWork.BeginAsync();
@@ -109,7 +109,7 @@ namespace AppCore.Orm.EntityFramework.Test
 
 
         [Fact]
-        public async Task Should_Begin_Another_Transaction_After_Committed()
+        public async Task Should_Begin_Another_Transaction_After_Previous_Transaction_Committed()
         {
             //Arrange
             await _efUnitofWork.BeginAsync();
@@ -133,7 +133,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public async Task Should_ReadUnCommitted_Isolation_Level_Work_As_Expected()
+        public async Task Should_Get_Uncommited_Entity_When_BeginAsync_Called_With_ReadUncommitted_Isolation_Level()
         {
             //Arrange
             await _efUnitofWork.BeginAsync(System.Data.IsolationLevel.ReadUncommitted);
