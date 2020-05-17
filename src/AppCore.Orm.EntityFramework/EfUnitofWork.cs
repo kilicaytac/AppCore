@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,11 +16,11 @@ namespace AppCore.Orm.EntityFramework
             _dbContext = dbContext;
         }
 
-        public async Task BeginAsync(CancellationToken cancellationToken = default)
+        public async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
         {
-            _currentTransaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            _currentTransaction = await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
-  
+
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _currentTransaction.CommitAsync(cancellationToken);
@@ -32,12 +33,9 @@ namespace AppCore.Orm.EntityFramework
 
         public void Dispose()
         {
-            if (_dbContext != null)
-                _dbContext.Dispose();
-
-            if (_currentTransaction!=null)
+            if (_currentTransaction != null)
                 _currentTransaction.Dispose();
-           
+
             GC.SuppressFinalize(this);
         }
     }

@@ -106,5 +106,30 @@ namespace AppCore.Orm.EntityFramework.Test
                 Assert.Null(testDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
             }
         }
+
+
+        [Fact]
+        public async Task Should_Begin_Another_Transaction_After_Committed()
+        {
+            //Arrange
+            await _efUnitofWork.BeginAsync();
+            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
+            _repository.Add(testEntity);
+            await _repository.SaveChangesAsync();
+            await _efUnitofWork.CommitAsync();
+
+            //Act
+            await _efUnitofWork.BeginAsync();
+            TestEntity testEntity2 = new TestEntity { Id = 2, Value = "Beşiktaşş" };
+            _repository.Add(testEntity2);
+            await _repository.SaveChangesAsync();
+            await _efUnitofWork.CommitAsync();
+
+            //Assert
+            using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
+            {
+                Assert.True(testDbContext.TestEntities.Count() == 2);
+            }
+        }
     }
 }
