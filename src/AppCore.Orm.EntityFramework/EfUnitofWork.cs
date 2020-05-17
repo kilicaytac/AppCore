@@ -2,12 +2,15 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Data;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+[assembly: InternalsVisibleTo("AppCore.Orm.EntityFramework.Test")]
+
 namespace AppCore.Orm.EntityFramework
 {
-    public class EfUnitOfWork : IUnitOfWork
+    internal class EfUnitOfWork : IUnitOfWork
     {
         private readonly DbContext _dbContext;
         private IDbContextTransaction _currentTransaction;
