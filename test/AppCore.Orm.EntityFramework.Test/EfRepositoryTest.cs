@@ -38,7 +38,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public void Add_Should_Work_As_Expected()
+        public void Add_Should_Add_Entity_To_Related_DbSet_Of_DbContext()
         {
             //Arrange
             TestEntity entity = new TestEntity();
@@ -52,7 +52,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public void Update_Should_Work_As_Expected()
+        public void Update_Should_Update_Entity_In_Related_DbSet_Of_DbContext()
         {
             //Arrange
             TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
@@ -74,7 +74,7 @@ namespace AppCore.Orm.EntityFramework.Test
 
 
         [Fact]
-        public void Delete_Should_Work_As_Expected()
+        public void Delete_Should_Remove_Entity_From_Related_DbSet_Of_DbContext()
         {
             //Arrange
             TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
@@ -92,7 +92,7 @@ namespace AppCore.Orm.EntityFramework.Test
 
 
         [Fact]
-        public async Task SaveChangesAsync_Should_Work_As_Expected()
+        public async Task SaveChangesAsync_Should_Commit_Changes_To_Underlying_Database()
         {
             //Arrange
             TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
@@ -106,7 +106,7 @@ namespace AppCore.Orm.EntityFramework.Test
         }
 
         [Fact]
-        public async Task GetByIdAsync_Should_Work_As_Expected()
+        public async Task GetByIdAsync_Should_Get_Entity_When_Entity_Is_Exist_In_Related_DbSet_Of_DbContext()
         {
             //Arrange
             TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
