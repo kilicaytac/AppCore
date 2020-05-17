@@ -1,17 +1,17 @@
-ï»¿using AppCore.Orm.EntityFramework;
+using AppCore.Orm.EntityFramework.Test.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 using System.Linq;
 using System.Threading.Tasks;
+using Xunit;
 
-namespace AppCore.UnitTest.Orm.EntityFramework
+namespace AppCore.Orm.EntityFramework.Test
 {
-    public class EntityFrameworkRepositoryTest : IAsyncLifetime
+    public class EfRepositoryTest : IAsyncLifetime
     {
         private TestDbContext _testDbContext;
-        private EntityFrameworkRepository<TestEntity> _repository;
+        private EfRepository<TestEntity> _repository;
 
-        public EntityFrameworkRepositoryTest()
+        public EfRepositoryTest()
         {
 
         }
@@ -22,7 +22,7 @@ namespace AppCore.UnitTest.Orm.EntityFramework
             dbContextOptionsBuilder.UseInMemoryDatabase("Test");
 
             _testDbContext = new TestDbContext(dbContextOptionsBuilder.Options);
-            _repository = new EntityFrameworkRepository<TestEntity>(_testDbContext);
+            _repository = new EfRepository<TestEntity>(_testDbContext);
 
             return Task.CompletedTask;
         }
@@ -36,7 +36,6 @@ namespace AppCore.UnitTest.Orm.EntityFramework
 
             return Task.CompletedTask;
         }
-
 
         [Fact]
         public void Add_Should_Work_As_Expected()
@@ -61,7 +60,7 @@ namespace AppCore.UnitTest.Orm.EntityFramework
             _repository.Add(entity);
             _testDbContext.SaveChanges();
 
-            string newValue = "BeÅŸiktaÅŸ";
+            string newValue = "Beþiktaþ";
 
             entity.Value = newValue;
 
