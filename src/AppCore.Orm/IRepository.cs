@@ -7,7 +7,7 @@ namespace AppCore.Orm
         void Add(T entity);
         void Update(T entity);
         void Delete(T entity);
-        Task<T> GetByIdAsync<IdType>(IdType id);
+        Task<T> GetByIdAsync<TId>(TId id);
         Task SaveChangesAsync();
     }
 }
