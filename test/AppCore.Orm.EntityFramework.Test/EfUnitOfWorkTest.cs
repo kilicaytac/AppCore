@@ -31,15 +31,14 @@ namespace AppCore.Orm.EntityFramework.Test
                 .UseSqlite(_sqliteConnection)
                 .Options;
 
-
             using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
             {
                 await testDbContext.Database.EnsureCreatedAsync();
             }
 
             _testDbContext = new TestDbContext(_testDbContextDbOptions);
-            _efUnitofWork = new EfUnitOfWork(_testDbContext);
             _repository = new EfRepository<TestEntity>(_testDbContext);
+            _efUnitofWork = new EfUnitOfWork(_testDbContext);
         }
 
         public async Task DisposeAsync()
@@ -75,16 +74,15 @@ namespace AppCore.Orm.EntityFramework.Test
             //Arrange
             await _efUnitofWork.BeginAsync();
             TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            _repository.Add(testEntity);
-            await _repository.SaveChangesAsync();
+            await _repository.InsertAsync(testEntity);
 
             //Act
             await _efUnitofWork.CommitAsync();
 
             //Assert
-            using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
+            using (TestDbContext newTestDbContext = new TestDbContext(_testDbContextDbOptions))
             {
-                Assert.NotNull(testDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
+                Assert.NotNull(newTestDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
             }
         }
 
@@ -94,19 +92,17 @@ namespace AppCore.Orm.EntityFramework.Test
             //Arrange
             await _efUnitofWork.BeginAsync();
             TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            _repository.Add(testEntity);
-            await _repository.SaveChangesAsync();
+            await _repository.InsertAsync(testEntity);
 
             //Act
             await _efUnitofWork.RollbackAsync();
 
             //Assert
-            using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
+            using (TestDbContext newTestDbContext = new TestDbContext(_testDbContextDbOptions))
             {
-                Assert.Null(testDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
+                Assert.Null(newTestDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
             }
         }
-
 
         [Fact]
         public async Task Should_Begin_Another_Transaction_After_Previous_Transaction_Committed()
@@ -114,21 +110,19 @@ namespace AppCore.Orm.EntityFramework.Test
             //Arrange
             await _efUnitofWork.BeginAsync();
             TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            _repository.Add(testEntity);
-            await _repository.SaveChangesAsync();
+            await _repository.InsertAsync(testEntity);
             await _efUnitofWork.CommitAsync();
 
             //Act
             await _efUnitofWork.BeginAsync();
             TestEntity testEntity2 = new TestEntity { Id = 2, Value = "Beşiktaşş" };
-            _repository.Add(testEntity2);
-            await _repository.SaveChangesAsync();
+            await _repository.InsertAsync(testEntity2);
             await _efUnitofWork.CommitAsync();
 
             //Assert
-            using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
+            using (TestDbContext newTestDbContext = new TestDbContext(_testDbContextDbOptions))
             {
-                Assert.True(testDbContext.TestEntities.Count() == 2);
+                Assert.True(newTestDbContext.TestEntities.Count() == 2);
             }
         }
 
@@ -139,16 +133,10 @@ namespace AppCore.Orm.EntityFramework.Test
             await _efUnitofWork.BeginAsync(System.Data.IsolationLevel.ReadUncommitted);
 
             TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            _repository.Add(testEntity);
-            await _repository.SaveChangesAsync();
-
-            TestEntity result = null;
+            await _repository.InsertAsync(testEntity);
 
             //Act
-            using (TestDbContext testDbContext = new TestDbContext(_testDbContextDbOptions))
-            {
-                result = await new EfRepository<TestEntity>(testDbContext).GetByIdAsync<int>(testEntity.Id);
-            }
+            TestEntity result = await new EfRepository<TestEntity>(_testDbContext).GetByIdAsync<int>(testEntity.Id);
 
             //Assert
             Assert.NotNull(result);

@@ -7,7 +7,7 @@ namespace AppCore.Mapper.AutoMapper.Test
     public class AutoMapperWrapperTest
     {
         [Fact]
-        public void Map_Should_Map_Source_Object_To_Target_Object()
+        public void Map_Should_Map_Source_Object_To_Destination_Object()
         {
             //Arrange
             Source source = new Source { Id = 1, Value = "Beþiktaþ" };
@@ -20,11 +20,11 @@ namespace AppCore.Mapper.AutoMapper.Test
             AutoMapperWrapper autoMapperWrapper = new AutoMapperWrapper(mappingConfig);
 
             //Act
-            Destination target = autoMapperWrapper.Map<Source, Destination>(source);
+            Destination destination = autoMapperWrapper.Map<Source, Destination>(source);
 
             //Assert
-            Assert.Equal(target.Id, source.Id);
-            Assert.Equal(target.Value, source.Value);
+            Assert.Equal(destination.Id, source.Id);
+            Assert.Equal(destination.Value, source.Value);
         }
     }
 }
