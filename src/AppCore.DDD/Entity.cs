@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace AppCore.DDD
 {
@@ -31,16 +29,13 @@ namespace AppCore.DDD
             _domainEvents = _domainEvents ?? new List<IDomainEvent>();
             _domainEvents.Add(domainEvent);
         }
-
         public void RemoveDomainEvent(IDomainEvent domainEvent)
         {
             _domainEvents?.Remove(domainEvent);
         }
-
         public void ClearDomainEvents()
         {
             _domainEvents?.Clear();
         }
-
     }
 }

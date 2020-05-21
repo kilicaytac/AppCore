@@ -1,13 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace AppCore.Orm
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<TEntity> where TEntity : class
     {
-        void Add(T entity);
-        void Update(T entity);
-        void Delete(T entity);
-        Task<T> GetByIdAsync<TId>(TId id);
-        Task SaveChangesAsync();
+        Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
+        Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
+        Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default);
+        Task<TEntity> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default);
     }
 }

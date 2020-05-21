@@ -1,34 +1,61 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AppCore.Orm.EntityFramework
 {
-    public class EfRepository<T> : IRepository<T> where T : class
+    public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         private readonly DbContext _dbContext;
+
+        private readonly DbSet<TEntity> _dbSet;
+        public bool AutoFlushEnabled { get; set; }
+        public DbContext DbContext { get { return _dbContext; } }
         public EfRepository(DbContext dbContext)
         {
             _dbContext = dbContext;
+            _dbSet = _dbContext.Set<TEntity>();
         }
-        public void Add(T entity)
+
+        public EfRepository(EfRepositoryOptions options) : this(options.DbContext)
         {
-            _dbContext.Set<T>().Add(entity);
+            AutoFlushEnabled = options.AutoFlushEnabled;
         }
-        public void Update(T entity)
+
+        public virtual async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
+        {
+            _dbSet.Add(entity);
+
+            if (AutoFlushEnabled)
+            {
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            return entity;
+        }
+        public virtual async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
+
+            if (AutoFlushEnabled)
+            {
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            return entity;
         }
-        public void Delete(T entity)
+        public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             _dbContext.Entry(entity).State = EntityState.Deleted;
+
+            if (AutoFlushEnabled)
+            {
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
         }
-        public async Task<T> GetByIdAsync<IdType>(IdType id)
+        public virtual async Task<TEntity> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<T>().FindAsync(id);
-        }
-        public async Task SaveChangesAsync()
-        {
-            await _dbContext.SaveChangesAsync();
+            return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
         }
     }
 }
