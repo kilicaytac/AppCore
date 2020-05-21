@@ -140,7 +140,7 @@ namespace AppCore.Orm.Nhibernate.Test
         public async Task Should_Get_Uncommited_Entity_When_BeginAsync_Called_With_ReadUncommitted_Isolation_Level()
         {
             //Arrange
-            await _nhUnitofWork.BeginAsync(System.Data.IsolationLevel.ReadUncommitted);
+            await _nhUnitofWork.BeginAsync(System.Data.IsolationLevel.Unspecified);
 
             TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
             await _repository.InsertAsync(testEntity);
