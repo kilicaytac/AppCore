@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace AppCore.Orm.Nhibernate
 {
-    public class NhRepository<TEntity> : IRepository<TEntity> where TEntity : class
+    public class NhRepository<TEntity> :IRepository<TEntity> where TEntity : class
     {
         private readonly ISession _session;
         public ISession Session { get { return _session; } }

@@ -18,8 +18,10 @@ namespace AppCore.MongoDB.Test.Configuration
         public Task InitializeAsync()
         {
             _runner = MongoDbRunner.StartForDebugging();
-            _mongoClient = new MongoClient(_runner.ConnectionString);
-
+            var url = new MongoUrl(_runner.ConnectionString);
+            var mongoClientSettings = MongoClientSettings.FromUrl(url);
+            mongoClientSettings.RetryWrites = false;
+            _mongoClient = new MongoClient(mongoClientSettings);
             return Task.CompletedTask;
         }
 

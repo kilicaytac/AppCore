@@ -9,19 +9,29 @@ namespace AppCore.MongoDB
     public class MngRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         private readonly IMongoCollection<TEntity> _collection;
-        private readonly TransactionContext _transactionContext;
-        public MngRepository(IMongoCollection<TEntity> collection, TransactionContext transactionContext)
+        private readonly IClientSessionHandle _session;
+
+        public MngRepository(IMongoCollection<TEntity> collection)
         {
             _collection = collection;
-            _transactionContext = transactionContext;
         }
+        public MngRepository(IMongoCollection<TEntity> collection, IClientSessionHandle session) : this(collection)
+        {
+            _session = session;
+        }
+        public MngRepository(IMongoDatabase database,string collectionName):this(database.GetCollection<TEntity>(collectionName))
+        {
+        }
+        public MngRepository(IMongoDatabase database, string collectionName,IClientSessionHandle session) : this(database.GetCollection<TEntity>(collectionName),session)
+        {
+        }  
 
         public virtual async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             InsertOneOptions options = new InsertOneOptions();
 
-            await (_transactionContext.Session == null ? _collection.InsertOneAsync(entity, options, cancellationToken) :
-                                      _collection.InsertOneAsync(_transactionContext.Session, entity, options, cancellationToken));
+            await (_session == null ? _collection.InsertOneAsync(entity, options, cancellationToken) :
+                                      _collection.InsertOneAsync(_session, entity, options, cancellationToken));
 
             return entity;
         }
@@ -33,8 +43,8 @@ namespace AppCore.MongoDB
 
             var filter = Builders<TEntity>.Filter.Eq("Id", entity.GetType().GetProperty("Id").GetValue(entity));
 
-            return await (_transactionContext.Session == null ? _collection.FindOneAndReplaceAsync<TEntity>(filter, entity, options, cancellationToken) :
-                                             _collection.FindOneAndReplaceAsync<TEntity>(_transactionContext.Session, filter, entity, options, cancellationToken));
+            return await (_session == null ? _collection.FindOneAndReplaceAsync<TEntity>(filter, entity, options, cancellationToken) :
+                                             _collection.FindOneAndReplaceAsync<TEntity>(_session, filter, entity, options, cancellationToken));
 
         }
 
@@ -43,16 +53,16 @@ namespace AppCore.MongoDB
             var filter = Builders<TEntity>.Filter.Eq("Id", entity.GetType().GetProperty("Id").GetValue(entity));
             DeleteOptions options = new DeleteOptions();
 
-            await (_transactionContext.Session == null ? _collection.DeleteOneAsync(filter, cancellationToken) :
-                                      _collection.DeleteOneAsync(_transactionContext.Session, filter, options, cancellationToken));
+            await (_session == null ? _collection.DeleteOneAsync(filter, cancellationToken) :
+                                      _collection.DeleteOneAsync(_session, filter, options, cancellationToken));
         }
 
         public virtual async Task<TEntity> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         {
             var filter = Builders<TEntity>.Filter.Eq("Id", id);
 
-            var findResult = await (_transactionContext.Session == null ? _collection.FindAsync<TEntity>(filter, null, cancellationToken) :
-                                                       _collection.FindAsync<TEntity>(_transactionContext.Session, filter, null, cancellationToken));
+            var findResult = await (_session == null ? _collection.FindAsync<TEntity>(filter, null, cancellationToken) :
+                                                       _collection.FindAsync<TEntity>(_session, filter, null, cancellationToken));
 
             return findResult.SingleOrDefault();
         }

@@ -35,9 +35,8 @@ namespace AppCore.Orm.Nhibernate
 
         public void Dispose()
         {
-            if (_currentTransaction != null)
-                _currentTransaction.Dispose();
-
+            _session?.Dispose();
+            _currentTransaction?.Dispose();
             GC.SuppressFinalize(this);
         }
     }

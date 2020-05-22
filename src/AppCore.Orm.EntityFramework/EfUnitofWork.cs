@@ -34,9 +34,7 @@ namespace AppCore.Orm.EntityFramework
 
         public void Dispose()
         {
-            if (_currentTransaction != null)
-                _currentTransaction.Dispose();
-
+            _currentTransaction?.Dispose();
             GC.SuppressFinalize(this);
         }
     }

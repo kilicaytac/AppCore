@@ -15,7 +15,8 @@ namespace AppCore.Orm.Nhibernate.Test
         private SQLiteConnection _sqliteConnection;
         private ISessionFactory _sessionFactory;
         private ISession _session;
-        private TestEntityRepository _repository;
+        private TestEntityRepository _nhRepository;
+        private TestEntity _entity;
         
         public NhibernateRepositoryTest()
         {
@@ -38,7 +39,8 @@ namespace AppCore.Orm.Nhibernate.Test
             _sessionFactory = configuration.BuildSessionFactory();
             _session = _sessionFactory.OpenSession();
 
-            _repository = new TestEntityRepository(_session);
+            _nhRepository = new TestEntityRepository(_session);
+            _entity = new TestEntity { Id = 1, Value = "Hello World" };
 
             return Task.CompletedTask;
         }
@@ -67,53 +69,49 @@ namespace AppCore.Orm.Nhibernate.Test
         public async Task InsertAsync_Should_Add_Entity_To_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-
+          
             //Act
-            await _repository.InsertAsync(entity);
+            await _nhRepository.InsertAsync(_entity);
 
             //Assert
-            Assert.NotNull(_session.Get<TestEntity>(entity.Id));
+            Assert.NotNull(_session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
         public async Task UpdateAsync_Should_Update_Entity_In_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-            await _repository.InsertAsync(entity);
-            entity.Value = "Beþiktaþ";
+            await _nhRepository.InsertAsync(_entity);
+            _entity.Value = "Beþiktaþ";
 
             //Act
-            await _repository.UpdateAsync(entity);
+            await _nhRepository.UpdateAsync(_entity);
 
             //Assert
-            Assert.Equal(_session.Get<TestEntity>(entity.Id).Value, entity.Value);
+            Assert.Equal(_session.Get<TestEntity>(_entity.Id).Value, _entity.Value);
         }
 
         [Fact]
         public async Task DeleteAsync_Should_Remove_Existing_Entity_From_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-            await _repository.InsertAsync(entity);
+            await _nhRepository.InsertAsync(_entity);
 
             //Act
-            await _repository.DeleteAsync(entity);
+            await _nhRepository.DeleteAsync(_entity);
 
             //Assert
-            Assert.Null(_session.Get<TestEntity>(entity.Id));
+            Assert.Null(_session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
         public async Task GetByIdAsync_Should_Get_Entity_When_Entity_Is_Exist_In_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-            await _repository.InsertAsync(entity);
+            await _nhRepository.InsertAsync(_entity);
 
             //Act
-            TestEntity result = await _repository.GetByIdAsync<int>(entity.Id);
+            TestEntity result = await _nhRepository.GetByIdAsync<int>(_entity.Id);
 
             //Assert
             Assert.NotNull(result);

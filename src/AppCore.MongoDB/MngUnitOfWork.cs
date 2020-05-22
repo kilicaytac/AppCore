@@ -9,21 +9,15 @@ namespace AppCore.MongoDB
 {
     public class MngUnitOfWork : IUnitOfWork
     {
-        private readonly MongoClient _client;
-        private IClientSessionHandle _session;
-        private readonly TransactionContext _transactionContext;
-        public MngUnitOfWork(MongoClient client, TransactionContext transactionContext)
+        private readonly IClientSessionHandle _session;
+        public MngUnitOfWork(IClientSessionHandle session)
         {
-            _client = client;
-            _transactionContext = transactionContext;
+            _session = session;
         }
         public async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
         {
-            ClientSessionOptions sessionOptions = new ClientSessionOptions();
-
-            _session = await _client.StartSessionAsync(sessionOptions, cancellationToken);
-            _transactionContext.Session = _session;
-            _session.StartTransaction();
+            //isolation level to => read,write concerns
+            await Task.Run(() => _session.StartTransaction());
         }
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
@@ -35,7 +29,7 @@ namespace AppCore.MongoDB
         }
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _session?.Dispose();
         }
     }
 }
