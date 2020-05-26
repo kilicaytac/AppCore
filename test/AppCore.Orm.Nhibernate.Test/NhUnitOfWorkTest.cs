@@ -15,9 +15,9 @@ namespace AppCore.Orm.Nhibernate.Test
         private SQLiteConnection _sqliteConnection;
         private ISessionFactory _sessionFactory;
         private ISession _session;
-        private NhRepository<TestEntity> _repository;
+        private NhRepository<TestEntity> _nhRepository;
         private NhUnitOfWork _nhUnitofWork;
-
+        private TestEntity _entity;
         public NhUnitOfWorkTest()
         {
 
@@ -39,8 +39,9 @@ namespace AppCore.Orm.Nhibernate.Test
             _sessionFactory = configuration.BuildSessionFactory();
             _session = _sessionFactory.OpenSession();
 
-            _repository = new NhRepository<TestEntity>(_session);
+            _nhRepository = new NhRepository<TestEntity>(_session);
             _nhUnitofWork = new NhUnitOfWork(_session);
+            _entity = new TestEntity { Id = 1, Value = "Beşiktaş" };
 
             return Task.CompletedTask;
         }
@@ -92,14 +93,13 @@ namespace AppCore.Orm.Nhibernate.Test
         {
             //Arrange
             await _nhUnitofWork.BeginAsync();
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _nhRepository.InsertAsync(_entity);
 
             //Act
             await _nhUnitofWork.CommitAsync();
 
             //Assert
-            Assert.NotNull(_session.Get<TestEntity>(testEntity.Id));
+            Assert.NotNull(_session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
@@ -107,14 +107,13 @@ namespace AppCore.Orm.Nhibernate.Test
         {
             //Arrange
             await _nhUnitofWork.BeginAsync();
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _nhRepository.InsertAsync(_entity);
 
             //Act
             await _nhUnitofWork.RollbackAsync();
 
             //Assert
-            Assert.NotNull(_session.Get<TestEntity>(testEntity.Id));
+            Assert.NotNull(_session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
@@ -122,14 +121,13 @@ namespace AppCore.Orm.Nhibernate.Test
         {
             //Arrange
             await _nhUnitofWork.BeginAsync();
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _nhRepository.InsertAsync(_entity);
             await _nhUnitofWork.CommitAsync();
 
             //Act
             await _nhUnitofWork.BeginAsync();
             TestEntity testEntity2 = new TestEntity { Id = 2, Value = "Beşiktaşş" };
-            await _repository.InsertAsync(testEntity2);
+            await _nhRepository.InsertAsync(testEntity2);
             await _nhUnitofWork.CommitAsync();
 
             //Assert
@@ -140,13 +138,11 @@ namespace AppCore.Orm.Nhibernate.Test
         public async Task Should_Get_Uncommited_Entity_When_BeginAsync_Called_With_ReadUncommitted_Isolation_Level()
         {
             //Arrange
-            await _nhUnitofWork.BeginAsync(System.Data.IsolationLevel.ReadUncommitted);
-
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _nhUnitofWork.BeginAsync(System.Data.IsolationLevel.Unspecified);
+            await _nhRepository.InsertAsync(_entity);
 
             //Act
-            TestEntity result =await _session.GetAsync<TestEntity>(testEntity.Id);
+            TestEntity result = await _session.GetAsync<TestEntity>(_entity.Id);
 
             //Assert
             Assert.NotNull(result);

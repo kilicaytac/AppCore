@@ -14,31 +14,28 @@ namespace AppCore.Orm.Nhibernate
         {
             _session = session;
         }
-        public async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
+        public virtual async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
         {
             if (_currentTransaction != null && _currentTransaction.IsActive)
                 throw new Exception("There is already an open transaction.");
 
             await Task.Run(() => _currentTransaction = _session.BeginTransaction(isolationLevel));
         }
-
-        public async Task CommitAsync(CancellationToken cancellationToken = default)
+        public virtual async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _session.FlushAsync(cancellationToken);
             await _currentTransaction.CommitAsync(cancellationToken);
         }
 
-        public async Task RollbackAsync(CancellationToken cancellationToken = default)
+        public virtual async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             await _currentTransaction.RollbackAsync(cancellationToken);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
-            if (_currentTransaction != null)
-                _currentTransaction.Dispose();
-
-            GC.SuppressFinalize(this);
+            _currentTransaction?.Dispose();
+            _session?.Dispose();
         }
     }
 }

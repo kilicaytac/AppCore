@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace AppCore.Orm.EntityFramework.Test
+namespace AppCore.Orm._entityFramework.Test
 {
     public class EfRepositoryTest : IAsyncLifetime
     {
         private DbContextOptions<TestDbContext> _dbContextOptions;
         private TestDbContext _testDbContext;
-        private TestEntityRepository _repository;
+        private TestEntityRepository _efRepository;
+        private TestEntity _entity;
        
         public EfRepositoryTest()
         {
@@ -25,7 +26,8 @@ namespace AppCore.Orm.EntityFramework.Test
 
             _dbContextOptions = dbContextOptionsBuilder.Options;
             _testDbContext = new TestDbContext(_dbContextOptions);
-            _repository = new TestEntityRepository(_testDbContext);
+            _efRepository = new TestEntityRepository(_testDbContext);
+            _entity = new TestEntity { Id = 1, Value = "Hello World" };
 
             return Task.CompletedTask;
         }
@@ -44,10 +46,9 @@ namespace AppCore.Orm.EntityFramework.Test
         public async Task InsertAsync_Should_Add_Entity_To_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity();
-
+          
             //Act
-            await _repository.InsertAsync(entity);
+            await _efRepository.InsertAsync(_entity);
 
             //Assert
             using (TestDbContext testDbContext = new TestDbContext(_dbContextOptions))
@@ -60,18 +61,17 @@ namespace AppCore.Orm.EntityFramework.Test
         public async Task UpdateAsync_Should_Update_Entity_In_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-            await _repository.InsertAsync(entity);
+            await _efRepository.InsertAsync(_entity);
             string newValue = "Beþiktaþ";
-            entity.Value = newValue;
+            _entity.Value = newValue;
 
             //Act
-            await _repository.UpdateAsync(entity);
+            await _efRepository.UpdateAsync(_entity);
 
             //Assert
             using (TestDbContext testDbContext = new TestDbContext(_dbContextOptions))
             {
-                Assert.True(testDbContext.TestEntities.FirstOrDefault(q => q.Id == entity.Id).Value == newValue);
+                Assert.True(testDbContext.TestEntities.FirstOrDefault(q => q.Id == _entity.Id).Value == newValue);
             }
         }
 
@@ -79,16 +79,15 @@ namespace AppCore.Orm.EntityFramework.Test
         public async Task DeleteAsync_Should_Remove_Existing_Entity_From_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-            await _repository.InsertAsync(entity);
+            await _efRepository.InsertAsync(_entity);
 
             //Act
-            await _repository.DeleteAsync(entity);
+            await _efRepository.DeleteAsync(_entity);
 
             //Assert
             using (TestDbContext testDbContext = new TestDbContext(_dbContextOptions))
             {
-                Assert.Null(testDbContext.TestEntities.FirstOrDefault(q => q.Id == entity.Id));
+                Assert.Null(testDbContext.TestEntities.FirstOrDefault(q => q.Id == _entity.Id));
             }
         }
 
@@ -96,14 +95,13 @@ namespace AppCore.Orm.EntityFramework.Test
         public async Task GetByIdAsync_Should_Get_Entity_When_Entity_Is_Exist_In_Underlying_Database()
         {
             //Arrange
-            TestEntity entity = new TestEntity { Id = 1, Value = "Hello World" };
-            await _repository.InsertAsync(entity);
+            await _efRepository.InsertAsync(_entity);
             TestEntity queryResult = null;
 
             //Act
             using (TestDbContext testDbContext = new TestDbContext(_dbContextOptions))
             {
-                queryResult = await _repository.GetByIdAsync<int>(entity.Id);
+                queryResult = await _efRepository.GetByIdAsync<int>(_entity.Id);
             }
 
             //Assert

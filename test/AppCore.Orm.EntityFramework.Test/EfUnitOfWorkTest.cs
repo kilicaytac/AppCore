@@ -15,7 +15,8 @@ namespace AppCore.Orm.EntityFramework.Test
 
         private TestDbContext _testDbContext;
         private EfUnitOfWork _efUnitofWork;
-        private EfRepository<TestEntity> _repository;
+        private EfRepository<TestEntity> _efRepository;
+        private TestEntity _entity;
         public EfUnitOfWorkTest()
         {
 
@@ -37,8 +38,9 @@ namespace AppCore.Orm.EntityFramework.Test
             }
 
             _testDbContext = new TestDbContext(_testDbContextDbOptions);
-            _repository = new EfRepository<TestEntity>(_testDbContext);
+            _efRepository = new EfRepository<TestEntity>(_testDbContext);
             _efUnitofWork = new EfUnitOfWork(_testDbContext);
+            _entity = new TestEntity { Id = 1, Value = "Beşiktaş" };
         }
 
         public async Task DisposeAsync()
@@ -73,8 +75,7 @@ namespace AppCore.Orm.EntityFramework.Test
         {
             //Arrange
             await _efUnitofWork.BeginAsync();
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _efRepository.InsertAsync(_entity);
 
             //Act
             await _efUnitofWork.CommitAsync();
@@ -82,7 +83,7 @@ namespace AppCore.Orm.EntityFramework.Test
             //Assert
             using (TestDbContext newTestDbContext = new TestDbContext(_testDbContextDbOptions))
             {
-                Assert.NotNull(newTestDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
+                Assert.NotNull(newTestDbContext.TestEntities.FirstOrDefault(q => q.Id == _entity.Id));
             }
         }
 
@@ -91,8 +92,7 @@ namespace AppCore.Orm.EntityFramework.Test
         {
             //Arrange
             await _efUnitofWork.BeginAsync();
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _efRepository.InsertAsync(_entity);
 
             //Act
             await _efUnitofWork.RollbackAsync();
@@ -100,7 +100,7 @@ namespace AppCore.Orm.EntityFramework.Test
             //Assert
             using (TestDbContext newTestDbContext = new TestDbContext(_testDbContextDbOptions))
             {
-                Assert.Null(newTestDbContext.TestEntities.FirstOrDefault(q => q.Id == testEntity.Id));
+                Assert.Null(newTestDbContext.TestEntities.FirstOrDefault(q => q.Id == _entity.Id));
             }
         }
 
@@ -109,14 +109,13 @@ namespace AppCore.Orm.EntityFramework.Test
         {
             //Arrange
             await _efUnitofWork.BeginAsync();
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _efRepository.InsertAsync(_entity);
             await _efUnitofWork.CommitAsync();
 
             //Act
             await _efUnitofWork.BeginAsync();
             TestEntity testEntity2 = new TestEntity { Id = 2, Value = "Beşiktaşş" };
-            await _repository.InsertAsync(testEntity2);
+            await _efRepository.InsertAsync(testEntity2);
             await _efUnitofWork.CommitAsync();
 
             //Assert
@@ -131,12 +130,10 @@ namespace AppCore.Orm.EntityFramework.Test
         {
             //Arrange
             await _efUnitofWork.BeginAsync(System.Data.IsolationLevel.ReadUncommitted);
-
-            TestEntity testEntity = new TestEntity { Id = 1, Value = "Beşiktaş" };
-            await _repository.InsertAsync(testEntity);
+            await _efRepository.InsertAsync(_entity);
 
             //Act
-            TestEntity result = await new EfRepository<TestEntity>(_testDbContext).GetByIdAsync<int>(testEntity.Id);
+            TestEntity result = await new EfRepository<TestEntity>(_testDbContext).GetByIdAsync<int>(_entity.Id);
 
             //Assert
             Assert.NotNull(result);

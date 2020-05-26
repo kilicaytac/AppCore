@@ -29,9 +29,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Mapper.Mapster", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Mapper.Mapster.Test", "test\AppCore.Mapper.Mapster.Test\AppCore.Mapper.Mapster.Test.csproj", "{3B9F5478-2B43-45F0-A941-D9FE8F37DE76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCore.Orm.Nhibernate", "src\AppCore.Orm.Nhibernate\AppCore.Orm.Nhibernate.csproj", "{8F66CFA7-FB2D-4FFA-A57D-1E7DD2F3F6CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Orm.Nhibernate", "src\AppCore.Orm.Nhibernate\AppCore.Orm.Nhibernate.csproj", "{8F66CFA7-FB2D-4FFA-A57D-1E7DD2F3F6CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCore.Orm.Nhibernate.Test", "test\AppCore.Orm.Nhibernate.Test\AppCore.Orm.Nhibernate.Test.csproj", "{514A4122-7165-435D-AFBC-059043AE796E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCore.Orm.Nhibernate.Test", "test\AppCore.Orm.Nhibernate.Test\AppCore.Orm.Nhibernate.Test.csproj", "{514A4122-7165-435D-AFBC-059043AE796E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCore.MongoDB", "src\AppCore.MongoDB\AppCore.MongoDB.csproj", "{8E0C2B02-0C9C-4F53-9C32-048D8D23FE06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppCore.MongoDB.Test", "test\AppCore.MongoDB.Test\AppCore.MongoDB.Test.csproj", "{A8C1CDC1-FBD5-4D3C-A68E-25E755E20C23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +95,14 @@ Global
 		{514A4122-7165-435D-AFBC-059043AE796E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{514A4122-7165-435D-AFBC-059043AE796E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{514A4122-7165-435D-AFBC-059043AE796E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E0C2B02-0C9C-4F53-9C32-048D8D23FE06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E0C2B02-0C9C-4F53-9C32-048D8D23FE06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E0C2B02-0C9C-4F53-9C32-048D8D23FE06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E0C2B02-0C9C-4F53-9C32-048D8D23FE06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8C1CDC1-FBD5-4D3C-A68E-25E755E20C23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8C1CDC1-FBD5-4D3C-A68E-25E755E20C23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8C1CDC1-FBD5-4D3C-A68E-25E755E20C23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8C1CDC1-FBD5-4D3C-A68E-25E755E20C23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,6 +121,8 @@ Global
 		{3B9F5478-2B43-45F0-A941-D9FE8F37DE76} = {C19C0048-E17E-47D5-95F8-96DF0B97076A}
 		{8F66CFA7-FB2D-4FFA-A57D-1E7DD2F3F6CE} = {D744DD7C-E3EA-469E-9855-0B3C857091AA}
 		{514A4122-7165-435D-AFBC-059043AE796E} = {C19C0048-E17E-47D5-95F8-96DF0B97076A}
+		{8E0C2B02-0C9C-4F53-9C32-048D8D23FE06} = {D744DD7C-E3EA-469E-9855-0B3C857091AA}
+		{A8C1CDC1-FBD5-4D3C-A68E-25E755E20C23} = {C19C0048-E17E-47D5-95F8-96DF0B97076A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E7588E17-DB7A-44DD-B155-0CDC3B239FE4}
