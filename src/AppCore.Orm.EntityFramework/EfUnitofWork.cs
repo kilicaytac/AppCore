@@ -16,26 +16,25 @@ namespace AppCore.Orm.EntityFramework
             _dbContext = dbContext;
         }
 
-        public async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
+        public virtual async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
         {
             _currentTransaction = await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
 
-        public async Task CommitAsync(CancellationToken cancellationToken = default)
+        public virtual async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _currentTransaction.CommitAsync(cancellationToken);
         }
 
-        public async Task RollbackAsync(CancellationToken cancellationToken = default)
+        public virtual async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             await _currentTransaction.RollbackAsync(cancellationToken);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             _currentTransaction?.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

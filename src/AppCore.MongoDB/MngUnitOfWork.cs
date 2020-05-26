@@ -10,24 +10,36 @@ namespace AppCore.MongoDB
     public class MngUnitOfWork : IUnitOfWork
     {
         private readonly IClientSessionHandle _session;
+        private readonly ITransactionOptionsConverter _transactionOptionsConverter;
         public MngUnitOfWork(IClientSessionHandle session)
         {
             _session = session;
         }
-        public async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
+
+        public MngUnitOfWork(IClientSessionHandle session, ITransactionOptionsConverter transactionOptionsConverter) : this(session)
         {
-            //isolation level to => read,write concerns
-            await Task.Run(() => _session.StartTransaction());
+            _transactionOptionsConverter = transactionOptionsConverter;
         }
-        public async Task CommitAsync(CancellationToken cancellationToken = default)
+        public virtual async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
+        {
+            TransactionOptions transactionOptions = null;
+
+            if (_transactionOptionsConverter != null)
+                transactionOptions = _transactionOptionsConverter.ConvertFromIsolationLevel(isolationLevel);
+            else
+                transactionOptions = isolationLevel.ToMngTransactionOptions();
+
+            await Task.Run(() => _session.StartTransaction(transactionOptions));
+        }
+        public virtual async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _session.CommitTransactionAsync(cancellationToken);
         }
-        public Task RollbackAsync(CancellationToken cancellationToken = default)
+        public virtual async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await _session.AbortTransactionAsync(cancellationToken);
         }
-        public void Dispose()
+        public virtual void Dispose()
         {
             _session?.Dispose();
         }

@@ -43,7 +43,7 @@ namespace AppCore.Orm._entityFramework.Test
         }
 
         [Fact]
-        public async Task InsertAsync_Should_Add__entity_To_Underlying_Database()
+        public async Task InsertAsync_Should_Add_Entity_To_Underlying_Database()
         {
             //Arrange
           
@@ -58,7 +58,7 @@ namespace AppCore.Orm._entityFramework.Test
         }
 
         [Fact]
-        public async Task UpdateAsync_Should_Update__entity_In_Underlying_Database()
+        public async Task UpdateAsync_Should_Update_Entity_In_Underlying_Database()
         {
             //Arrange
             await _efRepository.InsertAsync(_entity);
@@ -76,7 +76,7 @@ namespace AppCore.Orm._entityFramework.Test
         }
 
         [Fact]
-        public async Task DeleteAsync_Should_Remove_Existing__entity_From_Underlying_Database()
+        public async Task DeleteAsync_Should_Remove_Existing_Entity_From_Underlying_Database()
         {
             //Arrange
             await _efRepository.InsertAsync(_entity);
@@ -92,7 +92,7 @@ namespace AppCore.Orm._entityFramework.Test
         }
 
         [Fact]
-        public async Task GetByIdAsync_Should_Get__entity_When__entity_Is_Exist_In_Underlying_Database()
+        public async Task GetByIdAsync_Should_Get_Entity_When_Entity_Is_Exist_In_Underlying_Database()
         {
             //Arrange
             await _efRepository.InsertAsync(_entity);
