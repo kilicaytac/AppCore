@@ -4,9 +4,9 @@ namespace AppCore.Orm.Nhibernate.Test.Configuration
 {
     public class TestEntityRepository : NhRepository<TestEntity>
     {
-        public TestEntityRepository(ISession session) : base(session)
+        public TestEntityRepository(INhSessionProvider sessionContext) : base(sessionContext)
         {
-            session.FlushMode = FlushMode.Always;
+
         }
     }
 }

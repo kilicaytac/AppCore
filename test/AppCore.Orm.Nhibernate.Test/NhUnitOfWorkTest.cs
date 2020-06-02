@@ -14,10 +14,11 @@ namespace AppCore.Orm.Nhibernate.Test
     {
         private SQLiteConnection _sqliteConnection;
         private ISessionFactory _sessionFactory;
-        private ISession _session;
+        private ISession Session { get { return _sessionProvider.GetSession(); } }
         private NhRepository<TestEntity> _nhRepository;
         private NhUnitOfWork _nhUnitofWork;
         private TestEntity _entity;
+        private INhSessionProvider _sessionProvider;
         public NhUnitOfWorkTest()
         {
 
@@ -37,10 +38,11 @@ namespace AppCore.Orm.Nhibernate.Test
             schemaExport.Execute(false, true, false, _sqliteConnection, null);
 
             _sessionFactory = configuration.BuildSessionFactory();
-            _session = _sessionFactory.OpenSession();
+           
+            _sessionProvider = new NhScopedSessionProvider(_sessionFactory, FlushMode.Always);
 
-            _nhRepository = new NhRepository<TestEntity>(_session);
-            _nhUnitofWork = new NhUnitOfWork(_session);
+            _nhRepository = new NhRepository<TestEntity>(_sessionProvider);
+            _nhUnitofWork = new NhUnitOfWork(_sessionProvider);
             _entity = new TestEntity { Id = 1, Value = "Beşiktaş" };
 
             return Task.CompletedTask;
@@ -58,9 +60,9 @@ namespace AppCore.Orm.Nhibernate.Test
                 _sessionFactory.Dispose();
             }
 
-            if (_session != null)
+            if (Session != null)
             {
-                _session.Dispose();
+                Session.Dispose();
             }
 
             return Task.CompletedTask;
@@ -75,7 +77,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhUnitofWork.BeginAsync();
 
             //Assert
-            Assert.NotNull(_session.Transaction);
+            Assert.NotNull(Session.Transaction);
         }
 
         [Fact]
@@ -99,7 +101,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhUnitofWork.CommitAsync();
 
             //Assert
-            Assert.NotNull(_session.Get<TestEntity>(_entity.Id));
+            Assert.NotNull(Session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
@@ -113,7 +115,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhUnitofWork.RollbackAsync();
 
             //Assert
-            Assert.NotNull(_session.Get<TestEntity>(_entity.Id));
+            Assert.NotNull(Session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
@@ -131,7 +133,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhUnitofWork.CommitAsync();
 
             //Assert
-            Assert.True(_session.QueryOver<TestEntity>().RowCount() == 2);
+            Assert.True(Session.QueryOver<TestEntity>().RowCount() == 2);
         }
 
         [Fact]
@@ -142,7 +144,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhRepository.InsertAsync(_entity);
 
             //Act
-            TestEntity result = await _session.GetAsync<TestEntity>(_entity.Id);
+            TestEntity result = await Session.GetAsync<TestEntity>(_entity.Id);
 
             //Assert
             Assert.NotNull(result);

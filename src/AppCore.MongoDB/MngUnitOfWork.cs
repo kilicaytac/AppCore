@@ -9,39 +9,38 @@ namespace AppCore.MongoDB
 {
     public class MngUnitOfWork : IUnitOfWork
     {
-        private readonly IClientSessionHandle _session;
-        private readonly ITransactionOptionsConverter _transactionOptionsConverter;
-        public MngUnitOfWork(IClientSessionHandle session)
+        private readonly ITransactionOptionsAdapter _transactionOptionsAdapter;
+        private readonly IMngSessionProvider _sessionProvider;
+
+        public IClientSessionHandle Session { get { return _sessionProvider.GetSession(); } }
+        public IMngSessionProvider SessionProvider { get { return _sessionProvider; } }
+
+        public MngUnitOfWork(IMngSessionProvider sessionProvider, ITransactionOptionsAdapter transactionOptionsAdapter = null)
         {
-            _session = session;
+            _sessionProvider = sessionProvider;
+            _transactionOptionsAdapter = transactionOptionsAdapter;
         }
 
-        public MngUnitOfWork(IClientSessionHandle session, ITransactionOptionsConverter transactionOptionsConverter) : this(session)
-        {
-            _transactionOptionsConverter = transactionOptionsConverter;
-        }
         public virtual async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
         {
             TransactionOptions transactionOptions = null;
 
-            if (_transactionOptionsConverter != null)
-                transactionOptions = _transactionOptionsConverter.ConvertFromIsolationLevel(isolationLevel);
-            else
-                transactionOptions = isolationLevel.ToMngTransactionOptions();
+            if (_transactionOptionsAdapter != null)
+                transactionOptions = _transactionOptionsAdapter.GetTransactionOptions(isolationLevel);
 
-            await Task.Run(() => _session.StartTransaction(transactionOptions));
+            await Task.Run(() => Session.StartTransaction(transactionOptions));
         }
         public virtual async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            await _session.CommitTransactionAsync(cancellationToken);
+            await Session.CommitTransactionAsync(cancellationToken);
         }
         public virtual async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
-            await _session.AbortTransactionAsync(cancellationToken);
+            await Session.AbortTransactionAsync(cancellationToken);
         }
         public virtual void Dispose()
         {
-            _session?.Dispose();
+            Session?.Dispose();
         }
     }
 }

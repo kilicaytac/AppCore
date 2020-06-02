@@ -10,7 +10,8 @@ namespace AppCore.MongoDB.Test
     {
         private readonly MongoClient _mongoClient;
         private IMongoDatabase _database;
-        private IMongoCollection<TestEntity> _collection;
+        private MngCollectionProvider _collectionProvider;
+        private IMongoCollection<TestEntity> Collection { get { return _collectionProvider.GetCollection<TestEntity>(); } }
         private MngRepository<TestEntity> _mngRepository;
         private TestEntity _entity;
         public MngRepositoryTest(MngInstanceFixture mngInstanceFixture)
@@ -21,8 +22,10 @@ namespace AppCore.MongoDB.Test
         public Task InitializeAsync()
         {
             _database = _mongoClient.GetDatabase("Test");
-            _collection = _database.GetCollection<TestEntity>("TestEntities");
-            _mngRepository = new MngRepository<TestEntity>(_collection);
+            MngScopedSessionProvider scopedSessionProvider = new MngScopedSessionProvider(_mongoClient);
+            _collectionProvider = new MngCollectionProvider(_database);
+            _collectionProvider.RegisterCollection<TestEntity>("TestEntities");
+            _mngRepository = new MngRepository<TestEntity>(scopedSessionProvider, _collectionProvider);
             _entity = new TestEntity { Id = 1, Value = "Hello World" };
 
             return Task.CompletedTask;
@@ -43,7 +46,7 @@ namespace AppCore.MongoDB.Test
 
             //Assert
             var filter = Builders<TestEntity>.Filter.Eq("Id", _entity.Id);
-            Assert.NotNull(_collection.Find(filter).SingleOrDefault());
+            Assert.NotNull(Collection.Find(filter).SingleOrDefault());
         }
 
         [Fact]
@@ -59,7 +62,7 @@ namespace AppCore.MongoDB.Test
 
             //Assert
             var filter = Builders<TestEntity>.Filter.Eq("Id", _entity.Id);
-            Assert.True(_collection.Find<TestEntity>(filter).SingleOrDefault().Value == newValue);
+            Assert.True(Collection.Find<TestEntity>(filter).SingleOrDefault().Value == newValue);
             Assert.True(result.Value == newValue);
         }
 
@@ -74,7 +77,7 @@ namespace AppCore.MongoDB.Test
 
             //Assert
             var filter = Builders<TestEntity>.Filter.Eq("Id", _entity.Id);
-            Assert.Null(_collection.Find(filter).SingleOrDefault());
+            Assert.Null(Collection.Find(filter).SingleOrDefault());
         }
 
         [Fact]

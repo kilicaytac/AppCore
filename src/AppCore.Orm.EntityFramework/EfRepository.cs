@@ -11,15 +11,17 @@ namespace AppCore.Orm.EntityFramework
         private readonly DbSet<TEntity> _dbSet;
         public bool AutoFlushEnabled { get; set; }
         public DbContext DbContext { get { return _dbContext; } }
+        public DbSet<TEntity> DbSet { get { return _dbSet; } }
+
         public EfRepository(DbContext dbContext)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<TEntity>();
         }
 
-        public EfRepository(EfRepositoryOptions options) : this(options.DbContext)
+        public EfRepository(DbContext dbContext, bool autoFlushEnabled) : this(dbContext)
         {
-            AutoFlushEnabled = options.AutoFlushEnabled;
+            AutoFlushEnabled = autoFlushEnabled;
         }
 
         public virtual async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)

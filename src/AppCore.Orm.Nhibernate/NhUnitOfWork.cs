@@ -8,22 +8,26 @@ namespace AppCore.Orm.Nhibernate
 {
     public class NhUnitOfWork : IUnitOfWork
     {
-        private readonly ISession _session;
+        private readonly INhSessionProvider _sessionProvider;
+
         private ITransaction _currentTransaction;
-        public NhUnitOfWork(ISession session)
+        public bool AutoFlushEnabled { get; set; }
+        public virtual ISession Session { get { return _sessionProvider.GetSession(); } }
+
+        public NhUnitOfWork(INhSessionProvider sessionProvider)
         {
-            _session = session;
+            _sessionProvider = sessionProvider;
         }
         public virtual async Task BeginAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
         {
             if (_currentTransaction != null && _currentTransaction.IsActive)
                 throw new Exception("There is already an open transaction.");
 
-            await Task.Run(() => _currentTransaction = _session.BeginTransaction(isolationLevel));
+            await Task.Run(() => _currentTransaction = Session.BeginTransaction(isolationLevel));
         }
         public virtual async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            await _session.FlushAsync(cancellationToken);
+            await Session.FlushAsync(cancellationToken);
             await _currentTransaction.CommitAsync(cancellationToken);
         }
 
@@ -35,7 +39,6 @@ namespace AppCore.Orm.Nhibernate
         public virtual void Dispose()
         {
             _currentTransaction?.Dispose();
-            _session?.Dispose();
         }
     }
 }

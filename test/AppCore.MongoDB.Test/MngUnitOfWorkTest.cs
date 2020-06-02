@@ -12,11 +12,13 @@ namespace AppCore.MongoDB.Test
     {
         private readonly MongoClient _mongoClient;
         private IMongoDatabase _database;
-        private IMongoCollection<TestEntity> _collection;
-        private IClientSessionHandle _session;
+        private MngCollectionProvider _collectionProvider;
+        private IMongoCollection<TestEntity> Collection { get { return _collectionProvider.GetCollection<TestEntity>(); } }
+        private IClientSessionHandle Session { get { return _scopedSessionProvider.GetSession(); } }
         private MngRepository<TestEntity> _mngRepository;
         private MngUnitOfWork _mngUnitOfWork;
         private TestEntity _entity;
+        private IMngSessionProvider _scopedSessionProvider;
 
         public MngUnitOfWorkTest(MngInstanceFixture mngInstanceFixture)
         {
@@ -26,16 +28,17 @@ namespace AppCore.MongoDB.Test
         {
             _database = _mongoClient.GetDatabase("Test");
             await _database.CreateCollectionAsync("TestEntities");
-            _collection = _database.GetCollection<TestEntity>("TestEntities");
-            _session = await _mongoClient.StartSessionAsync();
-            _mngRepository = new MngRepository<TestEntity>(_collection, _session);
-            _mngUnitOfWork = new MngUnitOfWork(_session);
+            _scopedSessionProvider = new MngScopedSessionProvider(_mongoClient);
+            _collectionProvider = new MngCollectionProvider(_database);
+            _collectionProvider.RegisterCollection<TestEntity>("TestEntities");
+            _mngRepository = new MngRepository<TestEntity>(_scopedSessionProvider, _collectionProvider);
+            _mngUnitOfWork = new MngUnitOfWork(_scopedSessionProvider);
             _entity = new TestEntity { Id = 1, Value = "Beşiktaş" };
         }
 
         public async Task DisposeAsync()
         {
-            _session?.Dispose();
+            Session?.Dispose();
             await _mongoClient.DropDatabaseAsync("Test");
         }
 
@@ -48,7 +51,7 @@ namespace AppCore.MongoDB.Test
             await _mngUnitOfWork.BeginAsync();
 
             //Assert
-            Assert.True(_session.IsInTransaction);
+            Assert.True(Session.IsInTransaction);
         }
 
         [Fact]
@@ -73,7 +76,7 @@ namespace AppCore.MongoDB.Test
 
             //Assert
             var filter = Builders<TestEntity>.Filter.Eq("Id", _entity.Id);
-            Assert.NotNull(_collection.Find(filter).SingleOrDefault());
+            Assert.NotNull(Collection.Find(filter).SingleOrDefault());
         }
 
         [Fact]
@@ -88,7 +91,7 @@ namespace AppCore.MongoDB.Test
 
             //Assert
             var filter = Builders<TestEntity>.Filter.Eq("Id", _entity.Id);
-            Assert.Null(_collection.Find(filter).SingleOrDefault());
+            Assert.Null(Collection.Find(filter).SingleOrDefault());
         }
 
         [Fact]
@@ -106,7 +109,7 @@ namespace AppCore.MongoDB.Test
             await _mngUnitOfWork.CommitAsync();
 
             //Assert
-            Assert.True(_collection.EstimatedDocumentCount() == 2);
+            Assert.True(Collection.EstimatedDocumentCount() == 2);
         }
 
         [Fact]
@@ -118,7 +121,7 @@ namespace AppCore.MongoDB.Test
             await _mngRepository.InsertAsync(new TestEntity { Id = 2, Value = "Karakartal" });
 
             ClientSessionOptions clientSessionOptions = new ClientSessionOptions();
-            clientSessionOptions.DefaultTransactionOptions = new TransactionOptions(readConcern:ReadConcern.Local);
+            clientSessionOptions.DefaultTransactionOptions = new TransactionOptions(readConcern: ReadConcern.Local);
 
             var newSession = await _mongoClient.StartSessionAsync(clientSessionOptions);
             var newCollection = _database.GetCollection<TestEntity>("TestEntities");

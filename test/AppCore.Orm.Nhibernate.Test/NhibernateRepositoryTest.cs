@@ -14,10 +14,10 @@ namespace AppCore.Orm.Nhibernate.Test
     {
         private SQLiteConnection _sqliteConnection;
         private ISessionFactory _sessionFactory;
-        private ISession _session;
+        private ISession Session { get { return _sessionProvider.GetSession(); } }
         private TestEntityRepository _nhRepository;
         private TestEntity _entity;
-        
+        private INhSessionProvider _sessionProvider;
         public NhibernateRepositoryTest()
         {
 
@@ -37,9 +37,9 @@ namespace AppCore.Orm.Nhibernate.Test
             schemaExport.Execute(false, true, false, _sqliteConnection, null);
 
             _sessionFactory = configuration.BuildSessionFactory();
-            _session = _sessionFactory.OpenSession();
 
-            _nhRepository = new TestEntityRepository(_session);
+            _sessionProvider = new NhScopedSessionProvider(_sessionFactory, FlushMode.Always);
+            _nhRepository = new TestEntityRepository(_sessionProvider);
             _entity = new TestEntity { Id = 1, Value = "Hello World" };
 
             return Task.CompletedTask;
@@ -57,9 +57,9 @@ namespace AppCore.Orm.Nhibernate.Test
                 _sessionFactory.Dispose();
             }
 
-            if (_session != null)
+            if (Session != null)
             {
-                _session.Dispose();
+                Session.Dispose();
             }
 
             return Task.CompletedTask;
@@ -69,12 +69,12 @@ namespace AppCore.Orm.Nhibernate.Test
         public async Task InsertAsync_Should_Add_Entity_To_Underlying_Database()
         {
             //Arrange
-          
+
             //Act
             await _nhRepository.InsertAsync(_entity);
 
             //Assert
-            Assert.NotNull(_session.Get<TestEntity>(_entity.Id));
+            Assert.NotNull(Session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]
@@ -88,7 +88,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhRepository.UpdateAsync(_entity);
 
             //Assert
-            Assert.Equal(_session.Get<TestEntity>(_entity.Id).Value, _entity.Value);
+            Assert.Equal(Session.Get<TestEntity>(_entity.Id).Value, _entity.Value);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace AppCore.Orm.Nhibernate.Test
             await _nhRepository.DeleteAsync(_entity);
 
             //Assert
-            Assert.Null(_session.Get<TestEntity>(_entity.Id));
+            Assert.Null(Session.Get<TestEntity>(_entity.Id));
         }
 
         [Fact]

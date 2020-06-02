@@ -5,9 +5,8 @@ namespace AppCore.Orm.EntityFramework.Test.Configuration
 {
     public class TestEntityRepository : EfRepository<TestEntity>
     {
-        public TestEntityRepository(TestDbContext dbContext) : base(dbContext)
+        public TestEntityRepository(TestDbContext dbContext) : base(dbContext, true)
         {
-            AutoFlushEnabled = true;
         }
     }
 }
