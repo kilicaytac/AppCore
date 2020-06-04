@@ -21,6 +21,12 @@ namespace AppCore.MongoDB
             _collection = collectionProvider.GetCollection<TEntity>();
         }
 
+        public MngRepository(IMngSessionProvider sessionProvider, IMongoCollection<TEntity> collection)
+        {
+            _sessionProvider = sessionProvider;
+            _collection = collection;
+        }
+
         public virtual async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             await _collection.InsertOneAsync(Session, entity, null, cancellationToken);

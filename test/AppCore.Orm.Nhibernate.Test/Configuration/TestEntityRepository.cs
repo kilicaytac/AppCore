@@ -4,7 +4,7 @@ namespace AppCore.Orm.Nhibernate.Test.Configuration
 {
     public class TestEntityRepository : NhRepository<TestEntity>
     {
-        public TestEntityRepository(INhSessionProvider sessionContext) : base(sessionContext)
+        public TestEntityRepository(INhSessionProvider sessionContext) : base(sessionContext, true)
         {
 
         }
